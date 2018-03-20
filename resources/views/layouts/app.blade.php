@@ -28,7 +28,7 @@
 
                     <!-- Branding Image -->
                     <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
+                        {{ config('app.name', 'Blog') }}
                     </a>
                 </div>
 
@@ -62,6 +62,11 @@
                                             {{ csrf_field() }}
                                         </form>
                                     </li>
+                                        @if(Auth::user())
+                                    <li>
+                                          <a href="/userBlog">Home</a>
+                                    </li>
+                                        @endif
                                 </ul>
                             </li>
                         @endguest
@@ -81,5 +86,99 @@
             $('.frmBlog').toggle();
         });
     </script>
+
+    <script type="text/javascript">
+         $(".deleteMe").click(function(e) {
+                    var url = $(this).data('url');
+                    var name = $(this).data('name');
+                  var infoDiv   = $('.infoDiv');
+                    if (confirm("Are you sure your want to  delete  " + name +'?')) {
+                            $.ajax({
+                                  'type' : "GET",
+                                  'url'  : url,
+                                  success:function(response){
+                                    console.log(response.message);
+                                    if (response.success == true) {
+                                       infoDiv.addClass('alert alert-success').append(response.message).fadeOut(5000);
+                                    }else{
+                                      infoDiv.addClass('alert alert-danger').append(response.message).fadeOut(5000);
+                                    }
+                                   window.location.reload();
+                                  }
+                            });
+                        }
+                        return false;
+                    e.preventDefault();
+                });
+    </script>
+
+    <script type="text/javascript">
+        function displayImage(input, divId){
+            var divId = divId;
+             if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#'+divId)
+                        .attr('src', e.target.result);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+          }
+    </script>
+
+<script type="text/javascript">
+      var btnUpdateBlog = $('.btnUpdateBlog');
+         var title     = $('.title');
+         var desc     = $('.desc');
+         var featured_image    = $('.featured_image');
+         var imgDiv         = $('.imgDiv');
+             btnUpdateBlog.on('click', function() {
+                 var url = $(this).data('url');
+                 alert(url);
+                 $.ajax({
+                     'type': 'GET',
+                     'url': url,
+                     success: function (response) {
+                      console.log(response);
+                          var featured_image  = response.featured_image;
+                          var img_src = "http://mystore.dev/"+response.featured_image;
+                         $('.blog_id').val(response.id),
+                         title.val(response.title);
+                         desc.val(response.desc);
+                         featured_image.attr('src', img_src);
+                         $("#myModal").modal('show');
+                     }
+                 })
+             });
+
+
+             /*update form*/
+             var frmBlogUpdate = $('#frmBlogUpdate');
+                     frmBlogUpdate.on('submit', function(e){
+                     e.preventDefault();
+                     var data = $(this).serialize();
+                     var id   = $('.blog_id').val();
+                     var url  = "{{URL::to('/')}}" + "/updateBlog/"+id+"/update";
+                     $.ajax({
+                       'type' : 'POST',
+                       'url'  : url,
+                       data    : data,
+                       success : function(response){
+                        console.log(response);
+                        if (response.success==true) {
+                            $('.infoDiv').append('successfully updated').addClass('alert alert-success').fadeOut(10000);
+                        }
+                       },complete:function(){
+                         window.location.reload();
+                       }
+                     })
+                     .fail(function (response) {
+                         alert('error while insert');
+                     });
+                     $('#frmBlogUpdate').modal('hide');
+                     });
+</script>
+
 </body>
 </html>

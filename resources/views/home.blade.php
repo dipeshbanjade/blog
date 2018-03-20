@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <div class="container">
     <div class="row">
@@ -23,8 +22,10 @@
                              </div>
                          </div>
                      @endif
+                     
                      <div class="row frmBlog" style="display: none; padding: 2em;">
-                         <form action="/blog" method="post" enctype="multipart/form-data">
+                    
+                         <form action="#" method="post" enctype="multipart/form-data">
                            <input type="hidden" name="_token" id="csrf-token" value="{{ Session::token() }}" />
                            <div class="form-group">
                              <label for="formGroupExampleInput">Title</label>

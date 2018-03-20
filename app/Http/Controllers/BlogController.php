@@ -6,6 +6,9 @@ use App\blog;
 use App\Http\Requests\blogValidation;
 use Illuminate\Http\Request;
 use Auth;
+use Intervention\Image\Facades\Image;
+use AppHelper;
+use File;
 
 class BlogController extends Controller
 {
@@ -14,13 +17,29 @@ class BlogController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $this->middleware('auth')->except('index');
+    }
+
+
     public function index()
     {
         $page['page_title'] = 'blog';
         $page['page_description'] = 'blog description';
-        $blog = blog::where('status', '1')->where('user_id', Auth::user()->id)->orderBy('created_at', 'desc');
+        $blog = blog::where('status', '1')->orderBy('created_at', 'desc');
         $myBlog = $blog ? $blog : '';
-        return view('blog', compact(['page', 'myBlog']));
+        return view('blog.index', compact(['page', 'myBlog']));
+    }
+
+    public function userBlog(){
+
+        $page['page_title'] = 'blog';
+        $page['page_description'] = 'blog description';
+        $blog = blog::where('status','1')->where('user_id', Auth::user()->id)->orderBy('created_at', 'desc')->get();
+        $userBlog = $blog ? $blog : '';
+        return view('blog.userBlog', compact(['page', 'userBlog']));
     }
 
 
@@ -48,18 +67,21 @@ class BlogController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(blogValidation $request)
+    public function store(Request $request)
     {
+        // dd($request->all('featured_image'));
         $date = date('Y-m-d h:i:s');
-        $save = new save();
+        $save = new blog;
         $save->title = $request->title;
         $save->desc  = $request->desc;
         $save->user_id = Auth::user()->id;
         $save->status = 1;
 
         if ($request->hasFile('featured_image')) {
-            $blogImage = $request->file('img_path');
+            $blogImage = $request->file('featured_image');
             $blogImageName = str_replace(' ', '', $request->title).$date. '.' . $blogImage->getClientOriginalExtension();
+
+            Image::make($blogImage)->resize(480, 300 )->save('blog/' . $blogImageName );
            $save->featured_image = 'blog/'.$blogImageName;
         }
 
@@ -70,13 +92,13 @@ class BlogController extends Controller
               'success' => true,
               'message' => 'successfully inserted'
             ], 200);*/
-            return view()->withMessage('successfully inserted');
+            return back()->withMessage('successfully inserted');
         }else{
             /*return response()->json([
                  'success' => false,
                  'message' => 'sorry blog is not save'
                 ], 203);*/
-                return view('home')->withMessage('oops try it again');
+                return back()->withMessage('oops try it again');
         }
 
     }
@@ -89,7 +111,7 @@ class BlogController extends Controller
      */
     public function show($id)
     {
-        $blog = findOrFail($id);
+        $blog = blog::findOrFail($id);
         if ($blog) {
             $page['page_title'] = $blog->title;
             $page['page_description'] = $blog->desc;
@@ -110,9 +132,9 @@ class BlogController extends Controller
            return response()->json([
                'success'       => true,
                'id'            => $blog->id,
-               'name'          => $blog->title,
+               'title'          => $blog->title,
                'desc'          => $blog->desc,
-               'blog_logo'     => $blog->featured_image,
+               'featured_image'     => $blog->featured_image,
                'user_id'       => $blog->user_id,
            ], 200);
 
@@ -145,7 +167,7 @@ class BlogController extends Controller
      */
     public function destroy($id)
     {
-        $blog = findOrFail($id);
+        $blog = blog::findOrFail($id);
         if ($blog) {
              if (file_exists($blog->featured_image)) {
                  File::delete($blog->featured_image);
@@ -153,7 +175,7 @@ class BlogController extends Controller
             $blog->delete();
             return response()->json([
               'success' => true,
-              'message' => 'product delete'
+              'message' => 'blog delete successfully'
              ], 200);
         }else{
             return response()->json([
