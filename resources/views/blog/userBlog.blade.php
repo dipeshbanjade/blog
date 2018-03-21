@@ -90,7 +90,7 @@
                        {!! Form::open(['id'=>'frmBlogUpdate', 'files'=>true]) !!}
                            {{ Form::hidden('blogId',null, ['class'=>'blog_id']) }}
                            @include('blog._form')
-                           <img src="" class="featured_image" width="50" height="50">
+                           <!-- <img src="" class="featured_image" width="50" height="50"> -->
                            {{ Form::submit('Update Blog', ['class'=>'btn btn-success updateBlog']) }}
                       {!! Form::close() !!}
                       </div>

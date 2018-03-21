@@ -21,5 +21,5 @@ Route::post('/blog/save', 'BlogController@store')->name('saveBlog');
 Route::get('/blog/delete/{id}', 'BlogController@destroy')->name('blogDelete');
 Route::get('/userBlog', 'BlogController@userBlog')->name('userBlog');
 Route::get('/userBlog/edit/{id}', 'BlogController@edit')->name('editBlog');
-Route::post('/userBlog/update', 'BlogController@update')->name('updateBlog');
+Route::post('/userBlog/{id}/update', 'BlogController@update')->name('updateBlog');
 // Route::resource('/blog','BlogController');

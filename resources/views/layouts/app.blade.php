@@ -7,7 +7,8 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'admin blog') }}</title>
+    <title>@yield('page_title')</title>
+    <meta name="description" content="@yield('page_description')">
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
@@ -74,7 +75,20 @@
                 </div>
             </div>
         </nav>
-
+        <div class="row">
+          <div class="container">
+                  
+                    @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+          </div>
+        </div>
         @yield('content')
     </div>
 
@@ -141,7 +155,6 @@
                      'url': url,
                      success: function (response) {
                       console.log(response);
-                          var featured_image  = response.featured_image;
                           var img_src = "http://mystore.dev/"+response.featured_image;
                          $('.blog_id').val(response.id),
                          title.val(response.title);
@@ -154,30 +167,31 @@
 
 
              /*update form*/
-             var frmBlogUpdate = $('#frmBlogUpdate');
-                     frmBlogUpdate.on('submit', function(e){
-                     e.preventDefault();
-                     var data = $(this).serialize();
-                     var id   = $('.blog_id').val();
-                     var url  = "{{URL::to('/')}}" + "/updateBlog/"+id+"/update";
-                     $.ajax({
-                       'type' : 'POST',
-                       'url'  : url,
-                       data    : data,
-                       success : function(response){
-                        console.log(response);
-                        if (response.success==true) {
-                            $('.infoDiv').append('successfully updated').addClass('alert alert-success').fadeOut(10000);
-                        }
-                       },complete:function(){
-                         window.location.reload();
-                       }
-                     })
-                     .fail(function (response) {
-                         alert('error while insert');
-                     });
-                     $('#frmBlogUpdate').modal('hide');
-                     });
+         var frmBlogUpdate = $('#frmBlogUpdate');
+                 frmBlogUpdate.on('submit', function(e){
+                 e.preventDefault();
+                 var data = $(this).serialize();
+                 var id   = $('.blog_id').val();
+                 var url  = "{{URL::to('/')}}" + "/userBlog/"+id+"/update";
+                  alert(url);
+                 $.ajax({
+                   'type' : 'POST',
+                   'url'  : url,
+                   data    : data,
+                   success : function(response){
+                    console.log(response);
+                    if (response.success==true) {
+                        $('.infoDiv').append('successfully updated').addClass('alert alert-success').fadeOut(10000);
+                    }
+                   },complete:function(){
+                     window.location.reload();
+                   }
+                 })
+                 .fail(function (response) {
+                     alert('error while insert');
+                 });
+                 $('#frmBlogUpdate').modal('hide');
+                 });
 </script>
 
 </body>

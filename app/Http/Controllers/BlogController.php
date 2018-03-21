@@ -67,7 +67,7 @@ class BlogController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(blogValidation $request)
     {
         // dd($request->all('featured_image'));
         $date = date('Y-m-d h:i:s');
@@ -81,7 +81,7 @@ class BlogController extends Controller
             $blogImage = $request->file('featured_image');
             $blogImageName = str_replace(' ', '', $request->title).$date. '.' . $blogImage->getClientOriginalExtension();
 
-            Image::make($blogImage)->resize(480, 300 )->save('blog/' . $blogImageName );
+            Image::make($blogImage)->resize(480, 300)->save('blog/' . $blogImageName );
            $save->featured_image = 'blog/'.$blogImageName;
         }
 
@@ -141,30 +141,49 @@ class BlogController extends Controller
        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\blog  $blog
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
-        $blog = blog::findOrFail($id);
-        $blog->title = $request->title;
-        $blog->desc = $request->desc;
+        $date = date('Y-m-d h:i:s');
+        $blog = blog::where('id', $request->blogId)->first();
+        return $request->all();
 
-        if ($request->hasFile('featured_image')) {
-            
+        if ($blog) {
+            $blog->title = $request->title;
+            $blog->desc = $request->desc;
+            if ($request->hasFile('featured_image')) {
+                if ($blog->featured_image) {
+                        File::delete($blog->featured_image);
+                    }
+                   $blogImage      = $request->file('featured_image');
+
+                   $chnBlogImg = str_replace(' ', '', $request->title).$time.'.'.$blogImage->getClientOriginalExtension();
+
+                   Image::make($blogImage )->resize(480, 300)->save('blog/' . $chnBlogImg );
+                   $save->event_featured_img = 'blog/'.$chnBlogImg;
+            }
+
+            $update = $blog->update();
+
+            if ($update) {
+                return response()->json([
+                 'success' => true,
+                 'message' => 'successfully update'
+                ], 200);
+            }else{
+                return response()->json([
+                 'success' => false,
+                 'message' => 'sorry try it again'
+                ], 403);
+            }
+
+        }else{
+            return response()->json([
+                 'success' => false,
+                 'message' => 'sorry blog not found'
+                ], 403);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\blog  $blog
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $blog = blog::findOrFail($id);

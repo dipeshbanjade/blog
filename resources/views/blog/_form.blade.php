@@ -1,4 +1,5 @@
  <div class="form-group">
+ <div class="infoDiv"></div>
   <label for="formGroupExampleInput">Title</label>
   <input type="text" name="title" class="form-control title" placeholder="title name here">
 </div>
@@ -9,5 +10,9 @@
 </div>
 
 <div class="form-group">
-    <input type="file" name="featured_image">
+      @if(isset($blog))
+               <img src="{{ asset($blog->featured_image) }}" width="100" height="100">
+       @endif
+    <img src="" width="100" height="100" id="blogImage">
+     <input name="featured_image" type='file' onchange="displayImage(this, 'blogImage');" title="select event featured image" />
 </div>
